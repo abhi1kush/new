@@ -1,6 +1,6 @@
 thread_queue_size 1000
 no_of_cores 10 
-no_of_clients 4800
+no_of_clients 2000
 timeout_min 5
 timeout_lambda 0.6
 context_switch 1
@@ -13,7 +13,7 @@ quantum_size 1
 servicetime_option 1 
 
 a 0.1 #lower limit
-b 1.0 #for upper limit
+b 2.0 #for upper limit
 servicetime_lambda 0.5
 simulation_time_per 100
 seed 20

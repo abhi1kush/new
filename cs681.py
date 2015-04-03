@@ -29,6 +29,7 @@ thinktime_b=12
 response_out = open("response.txt","a")
 through_out = open("through_out.txt","a")
 drop_out=open("drop_out.txt","a")
+util_out=open("util_out.txt","a")
 #########taking input from file#########
 with open("sim_input.txt","r") as inputfile:
     for lline in inputfile:
@@ -115,6 +116,9 @@ class cores:
         self.q=Queue.Queue() # queue for thread
         self.quantum_time = qntm_size
 	self.utilization=0
+	self.startU=0
+	self.endU=0
+	self.total=0
 
 ########################### server class ##############
 
@@ -231,6 +235,7 @@ def arrival(req_obj):
 		#check that core_obj's queue==empty
 		if core[ret].q.empty():
 			#call that_function1
+			core[ret].startU=clock
 			setevent(req_obj)
 		#put req_obj into queue of core_obj
 		core[ret].q.put(req_obj)
@@ -265,17 +270,21 @@ def departure(core_obj,req_obj):
 	#give this thread to next req waiting in thread_queue
 	if not server_obj.thread_queue.empty():
 		thr_obj=server_obj.thread_queue.get()
-		thr_obj.thread_id=req_obj.thread_id
+                thr_obj.thread_id=req_obj.thread_id
+                #print core_obj.endU,core_obj.startU
 		server_obj.threadpool[req_obj.thread_id]=thr_obj.req_id
 		processreq(thr_obj)
         req_obj.thread_id = -1
         if not core_obj.q.empty():
             myobj=core_obj.q.get()#get the first departed event and discard it
+	    core_obj.endU=clock
+	    core_obj.total+=(core_obj.endU-core_obj.startU)
 	    stats.response_time+=clock - myobj.timestamp
 	    #server.response+=(clock-myobj.response_start[myobj.req_id])#strores end time of departed request 
 	    stats.response_count += 1
         if not core_obj.q.empty():
   		temp_obj=list(core_obj.q.queue)[0]
+		core_obj.startU=clock
 		#call that_fucntion3
 	    	setevent(temp_obj)
         req_obj.depart = 1
@@ -351,7 +360,7 @@ while clock < simulation_time_per:
             #else:
             #    print "| waiting in thread queue"
 response_out.write(str(stats.response_time/stats.response_count)+"\n")
-print stats.goodput,stats.badput
+#print stats.goodput,stats.badput
 through_out.write(str(stats.goodput/stats.last_departure)+"\t") 
 through_out.write(str(stats.badput/stats.last_departure)+"\n")
 #print stats.response_time/stats.response_count,"hi"
@@ -360,6 +369,14 @@ drate = drate * 100
 drop_out.write(str(stats.drop)+"\t")
 drop_out.write(str(stats.arrived)+"\t")
 drop_out.write(str(drate)+"\n")
+sum1=0
+for x in range(1,no_of_cores+1):
+	sum1=sum1+((float(core[x].total)/simulation_time_per)*100)
+        #print sum1,core[x].total
+avgU=float(sum1)/no_of_cores
+#print "avg utilization : ", avgU
+util_out.write(str(avgU)+"\n")
+util_out.close()
 response_out.close()
 through_out.close()
 drop_out.close()
