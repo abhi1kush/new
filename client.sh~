@@ -12,4 +12,4 @@ do
 done
 
 #####calculating confidence interval #################
-cat resp_client.txt | awk '{print $1-1.55*sqrt($2/10),$1+1.55*sqrt($2/10)}'
+cat resp_client.txt | awk '{print $1-0.95*sqrt($2/10),$1+0.95*sqrt($2/10)}'

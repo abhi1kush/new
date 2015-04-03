@@ -27,6 +27,7 @@ thinktime_b=12
 
 ########################################
 response_out = open("response.txt","a")
+through_out = open("through_out.txt","a")
 #########taking input from file#########
 with open("sim_input.txt","r") as inputfile:
     for lline in inputfile:
@@ -94,6 +95,9 @@ class stats:
 	droprate=0
 	server_utilization=0
         present=0
+        last_departure=0
+        drop=0
+        arrived=0
 
 ################### event class ################## 
 class event:
@@ -143,6 +147,7 @@ class request:
 	def __init__(self,ts):
 		self.req_id = request.temp
 		request.temp += 1
+                self.timeout_done=0
 		#self.thinktime = thinktime_lambda #this is user input...constant think time
                 #request.time += self.thinktime
                 self.timestamp = ts 
@@ -210,7 +215,9 @@ def setevent(req_obj):
 
 
 def arrival(req_obj):
+        stats.arrived+=1
 	if server_obj.thread_queue.full():
+                stats.drop+=1
 		return -1
 	else:
             # check for availablity of thread
@@ -247,6 +254,11 @@ def departure(core_obj,req_obj):
 	stats.present-=1
 	if stats.present == 0:
 		exit
+        if req_obj.timeout_done == 1:
+            stats.badput+=1
+        else:
+            stats.goodput+=1
+        stats.last_departure=clock
         #server_obj.release_thread(thread_id)
 	server_obj.threadpool[req_obj.thread_id] = 0
 	#give this thread to next req waiting in thread_queue
@@ -287,6 +299,7 @@ def timeout_handler(req_obj):
         if req_obj.depart == 1:
             return 1
         else:
+            req_obj.timeout_done=1
             #client sends request again
             req_obj.timeout_counter+=1
             #req_obj.timestamp = clock
@@ -294,6 +307,7 @@ def timeout_handler(req_obj):
             event_obj.addintoqueue(clock,req_obj,"arriv")
             event_obj.addintoqueue(clock + timeout_per() ,req_obj,"timeo")
 	    stats.present+=1
+            stats.arrived+=1
 
 
 print "request_id | clock | total service time | remaining sevice time | thread queue size | core "
@@ -336,6 +350,11 @@ while clock < simulation_time_per:
             #else:
             #    print "| waiting in thread queue"
 response_out.write(str(stats.response_time/stats.response_count)+"\n")
+print stats.goodput,stats.badput
+through_out.write(str(stats.goodput/stats.last_departure)+"\t") 
+through_out.write(str(stats.badput/stats.last_departure)+"\n")
 #print stats.response_time/stats.response_count,"hi"
+print stats.drop,stats.arrived,stats.drop/stats.arrived
 response_out.close()
+through_out.close()
 
