@@ -28,6 +28,7 @@ thinktime_b=12
 ########################################
 response_out = open("response.txt","a")
 through_out = open("through_out.txt","a")
+drop_out=open("drop_out.txt","a")
 #########taking input from file#########
 with open("sim_input.txt","r") as inputfile:
     for lline in inputfile:
@@ -354,7 +355,12 @@ print stats.goodput,stats.badput
 through_out.write(str(stats.goodput/stats.last_departure)+"\t") 
 through_out.write(str(stats.badput/stats.last_departure)+"\n")
 #print stats.response_time/stats.response_count,"hi"
-print stats.drop,stats.arrived,stats.drop/stats.arrived
+drate = float(stats.drop)/stats.arrived
+drate = drate * 100
+drop_out.write(str(stats.drop)+"\t")
+drop_out.write(str(stats.arrived)+"\t")
+drop_out.write(str(drate)+"\n")
 response_out.close()
 through_out.close()
+drop_out.close()
 

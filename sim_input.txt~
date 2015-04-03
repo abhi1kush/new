@@ -1,10 +1,10 @@
-thread_queue_size 100000
+thread_queue_size 1000
 no_of_cores 10 
-no_of_clients 4500
-timeout_min 50
+no_of_clients 4800
+timeout_min 5
 timeout_lambda 0.6
 context_switch 1
-size_of_threadpool 10000
+size_of_threadpool 1000
 thinktime_constant -1
 thinktime_a 3
 thinktime_b 11
@@ -13,7 +13,7 @@ quantum_size 1
 servicetime_option 1 
 
 a 0.1 #lower limit
-b 5.0 #for upper limit
+b 1.0 #for upper limit
 servicetime_lambda 0.5
 simulation_time_per 100
 seed 20
